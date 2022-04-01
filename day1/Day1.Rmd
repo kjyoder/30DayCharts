@@ -5,7 +5,7 @@ author: Keith Yoder
 output: html_notebook
 ---
 
-```{r}
+```{r setup}
 require(readr)
 require(ggplot2)
 require(magrittr)
@@ -18,18 +18,20 @@ require(ggfittext)
 Data from [World Population Review](https://worldpopulationreview.com/us-cities/chicago-il-population) based on 2019 US Census data.
 
 
-```{r}
+```{r import_data}
 d <- read_csv('../data/CHIRaceEthnicity.csv')
-```
 
-```{r}
+# remove labels from small categories
 d <- 
   d %>%
   mutate(label = case_when(
     Percent > 6 ~ Percent,
     TRUE ~ NA_real_
   ))
+```
 
+```{r plot}
+png('Day1.png', width=600, height=450, res = 120)
 p <- d %>%
   ggplot(aes(x="", y=Percent, 
              fill=fct_reorder(RaceLabel, Percent),
@@ -42,12 +44,17 @@ p <- d %>%
        subtitle = "In 2019, Chicago was just under 50% White",
        caption = "Data: World Population Review | Graphic: @drkeithyoder | #30DayChartChallenge",
        fill = "Race", y = "%") +
-  theme(axis.title.x = element_blank())
+  theme(axis.title.x = element_blank(),
+        plot.caption = element_text(hjust = 0),
+        plot.title =  element_text(hjust = .8),
+        plot.subtitle = element_text(hjust = .4))
 
 p +
   geom_bar_text(position = 'stack',
                 outside = TRUE,
                 min.size = 3,
                 reflow = TRUE)
+
+dev.off()
 ```
 
