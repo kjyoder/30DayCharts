@@ -1,0 +1,53 @@
+---
+title: "Day 1"
+date: 2022-04-01
+author: Keith Yoder
+output: html_notebook
+---
+
+```{r}
+require(readr)
+require(ggplot2)
+require(magrittr)
+require(forcats)
+require(dplyr)
+require(RColorBrewer)
+require(ggfittext)
+```
+
+Data from [World Population Review](https://worldpopulationreview.com/us-cities/chicago-il-population) based on 2019 US Census data.
+
+
+```{r}
+d <- read_csv('../data/CHIRaceEthnicity.csv')
+```
+
+```{r}
+d <- 
+  d %>%
+  mutate(label = case_when(
+    Percent > 6 ~ Percent,
+    TRUE ~ NA_real_
+  ))
+
+p <- d %>%
+  ggplot(aes(x="", y=Percent, 
+             fill=fct_reorder(RaceLabel, Percent),
+             label = label)) +
+  geom_bar(stat = 'identity') +
+  #geom_text(size=4, position = position_stack(vjust = 0.5)) +
+  theme_classic() +
+  scale_fill_brewer(palette="Purples") +
+  labs(title = "Chicago Racial Demographics",
+       subtitle = "In 2019, Chicago was just under 50% White",
+       caption = "Data: World Population Review | Graphic: @drkeithyoder | #30DayChartChallenge",
+       fill = "Race", y = "%") +
+  theme(axis.title.x = element_blank())
+
+p +
+  geom_bar_text(position = 'stack',
+                outside = TRUE,
+                min.size = 3,
+                reflow = TRUE)
+```
+
