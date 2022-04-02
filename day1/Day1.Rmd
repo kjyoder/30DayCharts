@@ -1,8 +1,10 @@
 ---
 title: "Day 1"
-date: 2022-04-01
-author: Keith Yoder
-output: html_notebook
+author: "Keith Yoder"
+date: '2022-04-01'
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup}
@@ -31,26 +33,28 @@ d <-
 ```
 
 ```{r plot}
-png('Day1.png', width=600, height=450, res = 120)
+png('Day1.png', width=800, height=600, units = 'px', res = 120)
 p <- d %>%
-  ggplot(aes(x="", y=Percent, 
+  ggplot(aes(x=fct_reorder(RaceLabel, Percent), y=Percent, 
              fill=fct_reorder(RaceLabel, Percent),
-             label = label)) +
-  geom_bar(stat = 'identity') +
+             label = Percent)) +
+  geom_bar(stat = 'identity', position='dodge') +
   #geom_text(size=4, position = position_stack(vjust = 0.5)) +
   theme_classic() +
-  scale_fill_brewer(palette="Purples") +
+  scale_fill_brewer(palette="Set3") +
   labs(title = "Chicago Racial Demographics",
        subtitle = "In 2019, Chicago was just under 50% White",
        caption = "Data: World Population Review | Graphic: @drkeithyoder | #30DayChartChallenge",
        fill = "Race", y = "%") +
-  theme(axis.title.x = element_blank(),
+  coord_flip() +
+  theme(axis.title.y = element_blank(),
+        legend.position = 'none',
         plot.caption = element_text(hjust = 0),
-        plot.title =  element_text(hjust = .8),
-        plot.subtitle = element_text(hjust = .4))
+        plot.title =  element_text(hjust = -.8),
+        plot.subtitle = element_text(hjust = -1.04))
 
 p +
-  geom_bar_text(position = 'stack',
+  geom_bar_text(position = 'dodge',
                 outside = TRUE,
                 min.size = 3,
                 reflow = TRUE)
