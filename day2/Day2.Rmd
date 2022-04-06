@@ -1,0 +1,71 @@
+---
+title: "Day 2: Pictogram"
+output: html_notebook
+author: Keith Yoder
+date: 2022-04-06
+---
+
+```{r setup}
+require(tidyverse)
+require(ggimage)
+require(png)
+```
+
+Data from National Coffee Association [nca](https://www.ncausa.org/Newsroom/NCA-releases-Atlas-of-American-Coffee)
+
+```{r import}
+d <- read_csv('../data/Coffee.csv')
+d <- 
+  d %>% 
+  mutate(shops = CPR*100000)
+d
+```
+
+```{r plot}
+fill_images <- function() {
+  l <- list()
+  for (i in 1:nrow(d)) {
+    for (j in seq(25,ceiling(d$shops[i]),2)) {
+      img <- readPNG('coffee_small.png')
+      g <- grid::rasterGrob(img, interpolate=TRUE)
+      l <- c(l, annotation_custom(g, xmin = i-2, xmax=i+2,
+                                  ymin = j-2, ymax=j))
+    }
+  }
+  l
+}
+
+clip_images <- function(restore_grid = TRUE) {
+  l <- list()
+  for (i in 1:nrow(d)) {
+    l <- c(l, geom_rect(xmin = i, xmax = i,
+                        ymin = d$shops[i], ymax=ceiling(d$shops[i]),
+                        color='white', fill='white'))
+    if (restore_grid && ceiling(d$shops[i]) %in% major_grid) {
+      l <- c(l, geom_segment(x = i-1, xend = i+1,
+                             y = ceiling(d$shops[i]),
+                             color = grid_col, size = grid_size))
+    }
+    
+    l
+  }
+}
+grid_col <- 'grey50'
+grid_size <- 0.6
+major_grid <- seq(25, 60, 5)
+
+ggplot(d, aes(fct_reorder(City, desc(shops)), shops)) +
+  fill_images() +
+  clip_images() +
+  geom_bar(fill=NA, color='white', size=1.2, alpha=.5, stat='identity') +
+  coord_flip() +
+  scale_y_continuous(breaks = seq(25, 60, 5),
+                     limits = c(25, 65)) +
+  scale_x_discrete() +
+  theme_classic() +
+  labs(y='Coffee shops per 100k residents', x='City',
+       title='Coffee shops in 15 most caffinated cities',
+       caption='Data: National Coffee Association | Graphic: @drkeithyoder') +
+  theme(plot.title =  element_text(hjust = -1))
+ggsave('Day2.png', height=6, width=4.5, units=('in'))
+```

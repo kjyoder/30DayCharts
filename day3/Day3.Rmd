@@ -1,0 +1,44 @@
+---
+title: "Day 3: Historical"
+output: html_notebook
+author: Keith Yoder
+date: 2022-04-06
+---
+
+```{r setup}
+require(tidyverse)
+```
+
+```{r import}
+d <- read_csv('../data/HSL.csv')
+d <- d %>%
+  filter(`Type of indicator` == 'Average')
+```
+
+```{r viz}
+income <- d %>% 
+  filter(Indicator == 'Household income') %>%
+  select(Time, Value) %>%
+  mutate(Income = Value / 1000)
+afford <- d %>%
+  filter(Indicator == 'Housing affordability') %>%
+  select(Time, Value) %>%
+  mutate(Affordability = Value/2)
+
+plot_d <-
+  full_join(income, afford, by='Time')
+  
+plot_d %>%
+  ggplot(aes(x=Time)) +
+  geom_line(aes(y=Income), color='blue') +
+  geom_line(aes(y=Affordability), color='red') +
+  theme_classic() +
+  scale_y_continuous(
+    name = 'Household Income ($10k)',
+    sec.axis = sec_axis(~.*2, name='Housing Affordability')
+  ) +
+  labs(x='Year', title='Household Income and Housing Affordability',
+       subtitle=str_c('From "How', "'s Life? Well-Being", '"'),
+       caption = 'Data: OECD | Graphic: @drkeithyoder')
+```
+
