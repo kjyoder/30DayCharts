@@ -1,5 +1,5 @@
 ---
-title: "Day 1"
+title: "Day 1: Part-to-Whole"
 author: "Keith Yoder"
 date: '2022-04-01'
 output:

@@ -28,10 +28,14 @@ afford <- d %>%
 plot_d <-
   full_join(income, afford, by='Time')
   
-plot_d %>%
+pal = c('firebrick3','dodgerblue3')
+
+p <- plot_d %>%
   ggplot(aes(x=Time)) +
-  geom_line(aes(y=Income), color='blue') +
-  geom_line(aes(y=Affordability), color='red') +
+  geom_line(aes(y=Income, color='Income')) +
+  scale_color_manual(values = pal[1L]) +
+  geom_line(aes(y=Affordability, color='Affordability')) +
+  scale_color_manual(values = pal[1:2]) +
   theme_classic() +
   scale_y_continuous(
     name = 'Household Income ($10k)',
@@ -39,6 +43,9 @@ plot_d %>%
   ) +
   labs(x='Year', title='Household Income and Housing Affordability',
        subtitle=str_c('From "How', "'s Life? Well-Being", '"'),
-       caption = 'Data: OECD | Graphic: @drkeithyoder')
+       caption = 'Data: OECD | Graphic: @drkeithyoder | #30DayChartChallenge', color=NULL) +
+  theme(legend.position = c(0.1, 0.95))
+p
+ggsave('Day3.png', width=800, height=600, units = 'px', dpi = 120)
 ```
 
