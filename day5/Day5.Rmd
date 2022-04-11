@@ -1,0 +1,45 @@
+---
+title: "Day 5: Slope"
+output: html_notebook
+author: Keith Yoder
+date: 2022-04-10
+---
+
+```{r setup, echo=FALSE, warning=FALSE}
+require(tidyverse)
+require(lubridate)
+```
+
+```{r import}
+terms <- c('Google', 'Facebook', 'TikTok', 'Youtube')
+d_all <- gtrends(terms, geo = rep('US', length(terms)))
+d <- d_all$interest_over_time
+d <- d %>%
+  mutate(hits = case_when(
+    hits == "<1" ~ 0,
+    TRUE ~ as.numeric(hits)
+  ))
+d %>% write_csv('../data/socmed_gtrends.csv')
+d %>% glimpse()
+```
+
+```{r tidy}
+h <- d %>%
+  mutate(Year = year(date)) %>%
+  group_by(Year, keyword) %>%
+  summarize(hits = mean(hits)) %>%
+  rename(Company = keyword) %>%
+  ungroup() %>%
+  ungroup()
+```
+
+```{r plot}
+h %>%
+  filter(Year >= 2021) %>%
+  ggplot(aes(Year, hits, color=Company)) +
+  geom_point() +
+  geom_line(aes(group=Company)) +
+  theme_classic() +
+  labs(y = 'Hits')
+```
+

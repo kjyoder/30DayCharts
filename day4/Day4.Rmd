@@ -2,13 +2,12 @@
 title: "Day 4: Magical"
 output: html_notebook
 author: Keith Yoder
-date: 2022-04-06
+date: 2022-04-10
 ---
 
 ```{r setup, echo=FALSE, warning=FALSE}
 require(tidyverse)
 require(gtrendsR)
-require(patchwork)
 ```
 
 ```{r import}
@@ -38,7 +37,7 @@ d %>%
         plot.subtitle = element_text(color='grey80'),
         plot.caption = element_text(color='grey80')) + 
   scale_color_manual(values = c('chocolate3', 'olivedrab4','goldenrod3')) +
-  labs(y='Hits (relative to highest)', color=NULL, 'Date',
+  labs(y='Hits (relative to highest)', color=NULL, x='Date',
        title = 'Magical creatures at Halloween',
        subtitle = 'Google Trends shows increase hits in October',
        caption = 'Data: Google | Graphic: @drkeithyoder | #30DayChartChallenge',)
