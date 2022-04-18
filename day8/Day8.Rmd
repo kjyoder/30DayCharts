@@ -19,7 +19,7 @@ require(lubridate)
 
 ```{r import, messauge=FALSE, warning=FALSE}
 # Load data (download if necessary)
-if (file.exists('../data/birdpreys_gtrends.csv')) {
+if (file.exists('../data/birdsprey_gtrends.csv')) {
   d <- read_csv('../data/birdsprey_gtrends.csv')
 } else {
   terms <- c('Eagle', 'Hawk', 'Owl', 'Falcon', 'Vulture')
