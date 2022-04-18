@@ -8,6 +8,7 @@ date: 2022-04-10
 ```{r setup, echo=FALSE, warning=FALSE}
 require(tidyverse)
 require(lubridate)
+require(gtrendsR)
 ```
 
 ```{r import}
@@ -35,11 +36,12 @@ h <- d %>%
 
 ```{r plot}
 h %>%
-  filter(Year >= 2021) %>%
+  filter(Year %in% c(2021, 2022)) %>%
+  mutate(Year = as.factor(Year)) %>%
   ggplot(aes(Year, hits, color=Company)) +
   geom_point() +
   geom_line(aes(group=Company)) +
-  theme_classic() +
-  labs(y = 'Hits')
+  labs(y = 'Hits') +
+  theme(panel.background = element_rect(fill='white'))
 ```
 

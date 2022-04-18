@@ -1,0 +1,65 @@
+---
+title: 'Day 6: Experimental'
+author: "Keith Yoder \n @drkeithyoder"
+date: '2022-04-16'
+output:
+  html_document:
+    df_print: paged
+---
+
+## Day 6 of \#30DayChartChallenge
+
+```{r setup, warning=FALSE, message=FALSE}
+require(tidyverse)
+require(streamgraph)
+require(gtrendsR)
+require(lubridate)
+```
+
+```{r import, warning=FALSE, message=FALSE}
+# Load data (download if necessary)
+if (file.exists('../data/berries_gtrends.csv')) {
+  d <- read_csv('../data/berries_gtrends.csv')
+} else {
+  terms <- c('Raspberry', 'Blueberry', 'Strawberry', 'Blackberry')
+  d_all <- gtrends(terms, geo = rep('US', length(terms)))
+  d <- d_all$interest_over_time
+  d <- d %>%
+    mutate(hits = case_when(
+      hits == "<1" ~ 0,
+      TRUE ~ as.numeric(hits)
+    ))
+  d %>% write_csv('../data/berries_gtrends.csv')
+}
+d %>% glimpse()
+```
+
+
+```{r tidy, warning=FALSE, message=FALSE}
+# tidy to average by month
+h <- d %>%
+  mutate(Year = year(date),
+         Month = month(date)) %>%
+  group_by(Year, Month, keyword) %>%
+  summarize(hits = mean(hits)) %>%
+  rename(Berry = keyword) %>%
+  ungroup() %>%
+  ungroup() 
+```
+
+```{r viz, warning=FALSE, message=FALSE}
+# Stream graph with a legend
+pp <- h %>%
+  unite(Date, Year, Month, sep='-', remove = FALSE) %>% 
+  mutate(Date = as_date(paste0(Date,'-01'))) %>%
+  streamgraph(key="Berry", value="hits", date="Date", height="300px", width="1000px",
+              order='inside-out') %>%
+  sg_legend(show=TRUE, label="Berry: ") %>%
+  sg_fill_manual(c('grey20','dodgerblue3','violetred4','firebrick3')) %>%
+  sg_axis_x(1, "year", "%Y") %>%
+  sg_title('Relative Google searches for berries') %>%
+  sg_axis_y(0)
+pp
+```
+
+

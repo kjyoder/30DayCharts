@@ -1,0 +1,59 @@
+---
+title: 'Day 8: Animals'
+author: "Keith Yoder \n @drkeithyoder"
+date: '2022-04-17'
+output:
+  html_document:
+    df_print: paged
+---
+
+## Day 7 of \#30DayChartChallenge
+Distributions: Animals
+
+```{r setup, message=FALSE, warning=FALSE}
+require(tidyverse)
+require(patchwork)
+require(gtrendsR)
+require(lubridate)
+```
+
+```{r import, messauge=FALSE, warning=FALSE}
+# Load data (download if necessary)
+if (file.exists('../data/birdpreys_gtrends.csv')) {
+  d <- read_csv('../data/birdsprey_gtrends.csv')
+} else {
+  terms <- c('Eagle', 'Hawk', 'Owl', 'Falcon', 'Vulture')
+  d_all <- gtrends(terms, geo = rep('US', length(terms)))
+  d <- d_all$interest_over_time
+  d <- d %>%
+    mutate(hits = case_when(
+      hits == "<1" ~ 0,
+      TRUE ~ as.numeric(hits)
+    ))
+  d %>% write_csv('../data/birdsprey_gtrends.csv')
+}
+d %>% glimpse()
+```
+
+```{r tidy, warning=FALSE, message=FALSE}
+# tidy to average by month
+h <- d %>%
+  mutate(Year = year(date),
+         Month = month(date)) %>%
+  group_by(Year, Month, keyword) %>%
+  summarize(hits = mean(hits)) %>%
+  rename(Bird = keyword) %>%
+  ungroup() %>%
+  ungroup() 
+```
+
+```{r}
+h %>%
+  ggplot(aes(Bird, hits, color=Bird)) +
+  geom_jitter(alpha=.3, width = .1) +
+  geom_violin(alpha=.2, draw_quantiles = c(.25, .5, .75)) +
+  theme_classic() +
+  labs(title='Average monthly searches for birds of prey',
+       subtitle='Data from April 2017 - March 2022')
+```
+

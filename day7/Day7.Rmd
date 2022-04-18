@@ -1,0 +1,72 @@
+---
+title: 'Day 7: Physical'
+author: "Keith Yoder \n @drkeithyoder"
+date: '2022-04-16'
+output:
+  html_document:
+    df_print: paged
+---
+
+## Day 7 of \#30DayChartChallenge
+Distributions: Physical
+
+```{r setup, warning=FALSE, message=FALSE}
+require(tidyverse)
+require(usmap)
+require(ggrepel)
+```
+
+```{r import}
+d <- read_csv('../data/mountains.csv',
+              col_types = cols(
+                .default = col_number(),
+                Peak = col_character(),
+                State = col_character()
+              ))
+d %>% glimpse()
+```
+
+```{r}
+d_t <- usmap_transform(d, input_names=c('Longitude', 'Latitude')) %>%
+  mutate(Elevation = Elevation/5280) %>%
+  filter(! State %in% c('AK', 'HI') )
+
+plot_usmap(fill='#fff1d2', regions='states', 
+           exclude=c('HI', 'AK', 'ME', 'VT', 'NH', 'MA', 'DE', 'MS', 'LA', 'FL',
+                     'GA', 'SC', 'NC', 'KY', 'IL', 'WI', 'MI', 'MN', 'OH', 'PA',
+                     'WV', 'VA', 'NY', 'CT', 'RI', 'NJ', 'AL', 'IN', 'TN', 'MD', 
+                     'DC', 'IA', 'MO', 'AR')) +
+  geom_point(data = d_t, aes(x = x, y = y, size=Elevation),
+             color = "#981b1e", alpha = 0.6) +
+  geom_label_repel(data=d_t, aes(x=x, y=y, label=Peak),
+                   size=2, alpha=.8, label.size=.1, #max.overlaps = 15,
+                   xlim = c(-Inf, Inf), ylim = c(-Inf, Inf)) +
+  theme(legend.position='right') +
+  scale_size_continuous(breaks=c(.25, .5, 1, 2)) +
+  coord_cartesian(xlim=c(-3.3e6, .45e6), ylim=c(-2.5e6, 1e6)) +
+  labs(title='Prominent Summits in Lower 48', size='Elevation (miles)',
+       subtitle='From 50 most prominent summits in US',
+       caption='Data: Wikipedia | Graphic: @drkeithyoder | #30DayChartChallenge')
+ggsave('Day7.png', width=5, height=4, bg='white')
+```
+
+```{r}
+data <- data.frame(
+  lon = c(-74.01, -95.36, -118.24, -87.65, -134.42, -157.86),
+  lat = c(40.71, 29.76, 34.05, 41.85, 58.30, 21.31),
+  pop = c(8398748, 2325502, 3990456, 2705994, 32113, 347397)
+)
+
+# Transform data
+transformed_data <- usmap_transform(data)
+
+# Plot transformed data on map
+library(ggplot2)
+
+plot_usmap() + geom_point(
+  data = transformed_data,
+  aes(x = x, y = y, size = pop),
+  color = "red", alpha = 0.5
+)
+```
+
