@@ -7,7 +7,7 @@ output:
     df_print: paged
 ---
 
-## Day 7 of \#30DayChartChallenge
+## Day 8 of \#30DayChartChallenge
 Distributions: Animals
 
 ```{r setup, message=FALSE, warning=FALSE}
@@ -37,23 +37,44 @@ d %>% glimpse()
 
 ```{r tidy, warning=FALSE, message=FALSE}
 # tidy to average by month
-h <- d %>%
-  mutate(Year = year(date),
-         Month = month(date)) %>%
-  group_by(Year, Month, keyword) %>%
-  summarize(hits = mean(hits)) %>%
+h_raw <- d %>%
   rename(Bird = keyword) %>%
+  mutate(Year = year(date),
+           Month = month(date)) %>%
+  group_by(Year, Month, Bird) %>%
+  summarize(hits = mean(hits)) %>%
   ungroup() %>%
-  ungroup() 
+  ungroup()
+
+h_norm <- d %>%
+  rename(Bird = keyword) %>%
+  group_by(Bird) %>%
+  mutate(max = max(hits),
+         m = mean(hits)) %>%
+  ungroup() %>%
+  mutate(Year = year(date),
+           Month = month(date)) %>%
+  group_by(Year, Month, Bird) %>%
+  summarize(hits = (mean(hits)-mean(m))/max ) %>%
+  ungroup() %>%
+  ungroup()
 ```
 
 ```{r}
-h %>%
-  ggplot(aes(Bird, hits, color=Bird)) +
-  geom_jitter(alpha=.3, width = .1) +
-  geom_violin(alpha=.2, draw_quantiles = c(.25, .5, .75)) +
+pr <- h_raw %>%
+  ggplot(aes(Bird, color=Bird, fill=Bird)) +
+  geom_density(alpha=.5) +
   theme_classic() +
   labs(title='Average monthly searches for birds of prey',
-       subtitle='Data from April 2017 - March 2022')
+       subtitle='Data from April 2017 - March 2022', y='Hits (% max)')
+pn <- h_norm %>%
+  ggplot(aes(Bird, hits, color=Bird)) +
+  geom_jitter(alpha=.3) +
+  geom_violin(alpha=.2, draw_quantiles = c(.25, .5, .75), width=1) +
+  theme_classic() +
+  labs(caption='Data: Google trends | Graphic: @drkeithyoder | #30DayChartChallenge')
+pr /
+  pn
+ggsave('Day8.png', height=6, width=6, units='in', bg='white')
 ```
 
