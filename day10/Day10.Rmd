@@ -1,0 +1,50 @@
+---
+title: 'Day 10: Experimental'
+author: "Keith Yoder \n @drkeithyoder"
+date: '2022-04-21'
+output:
+  html_document:
+    df_print: paged
+---
+
+## Day 10 of \#30DayChartChallenge
+Distributions: Experimental
+
+```{r setup, message=FALSE, warning=FALSE}
+require(tidyverse)
+require(distributional)
+require(ggdist)
+```
+
+```{r sim_data}
+n1 <- 90
+n2 <- 100
+m1 <- .7
+m2 <- .8
+s1 <- 1.2
+s2 <- 0.9
+
+diff_m <- m2-m1
+diff_s <- sqrt(((n1-1)*s1^2 + (n2-1)*s2^2)/(n1+n2-2))
+
+t <- diff_m / (diff_s * sqrt( (1/n1) + (1/n2)))
+df <- (n1+n2-2)
+
+d <- tibble(
+  group = c('Group 1', 'Group 2', 'Difference'),
+  mean = c(m1, m2, diff_m),
+  sd = c(s1, s2, diff_s)
+)
+
+d %>% 
+  ggplot(aes(
+    y=group, 
+    xdist=dist_normal(mean, sd)
+    )) + 
+  stat_halfeye(aes(fill=group)) +
+  theme_classic() +
+  labs(y='Source')
+
+
+```
+
