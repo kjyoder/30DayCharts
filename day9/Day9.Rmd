@@ -22,14 +22,17 @@ df = data.frame(
            'Gamma(0.5, 1)', 'Gamma(1, 1)', 'Gamma(2, 1)', 'Gamma(5, 1)',
            'Gamma(0.5, 2)', 'Gamma(1, 2)', 'Gamma(2, 2)', 'Gamma(5, 2)',
            'Gamma(0.5, 5)', 'Gamma(1, 5)', 'Gamma(2, 5)', 'Gamma(5, 5)'),
+  Shape = rep(c('0.5', '1', '2', '5'), 4),
+  Rate = rep(c('0.5', '1', '2', '5'), each=4),
   dist = c(dist_gamma(.5,.5), dist_gamma(1,.5), dist_gamma(2,.5), dist_gamma(5,.5),
            dist_gamma(.5, 1), dist_gamma(1, 1), dist_gamma(2, 1), dist_gamma(5, 1),
            dist_gamma(.5, 2), dist_gamma(1, 2), dist_gamma(2, 2), dist_gamma(5, 2),
            dist_gamma(.5, 5), dist_gamma(1, 5), dist_gamma(2, 5), dist_gamma(5, 5))
 )
-ggplot(df, aes(y = factor(name))) +
+ggplot(df, aes(y = factor(Rate))) +
   stat_dist_halfeye(aes(dist=dist)) +
-  labs(title='Density plots')
+  labs(title='Density plots') +
+  facet_wrap(~Shape)
            
   
 
