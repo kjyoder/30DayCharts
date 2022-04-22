@@ -14,6 +14,7 @@ Distributions: Experimental
 require(tidyverse)
 require(distributional)
 require(ggdist)
+require(patchwork)
 ```
 
 ```{r sim_data}
@@ -29,22 +30,104 @@ diff_s <- sqrt(((n1-1)*s1^2 + (n2-1)*s2^2)/(n1+n2-2))
 
 t <- diff_m / (diff_s * sqrt( (1/n1) + (1/n2)))
 df <- (n1+n2-2)
+```
 
+```{r build_plots}
 d <- tibble(
   group = c('Group 1', 'Group 2', 'Difference'),
   mean = c(m1, m2, diff_m),
   sd = c(s1, s2, diff_s)
 )
 
-d %>% 
+p_dists <- d %>% 
   ggplot(aes(
-    y=group, 
+    y=factor(group), 
     xdist=dist_normal(mean, sd)
     )) + 
-  stat_halfeye(aes(fill=group)) +
+  stat_slab(aes(fill=group)) +
+  scale_fill_manual(values=c('skyblue', 'gray80', 'gray80')) +
   theme_classic() +
-  labs(y='Source')
+  labs(y='Source', fill = 'Source',
+       subtitle = "Groups (and difference)")
+
+df <- (n1+n2-2)
+# pick smallest effect size of interest
+# specified as Cohen's D
+target_d <- .2
+
+t_low <- -target_d / (diff_s * sqrt( (1/n1) + (1/n2)))
+t_high <- target_d / (diff_s * sqrt( (1/n1) + (1/n2)))
+
+pl <- tibble(mean = diff_m,
+       sd = diff_s) %>%
+  ggplot(aes(
+    xdist = dist_normal(mean, sd),
+    fill = stat(x < t_high)
+  )) +
+  stat_slab() +
+  theme_classic() +
+  scale_fill_manual(values=c('gray80', 'skyblue'),
+                    labels=c('H1', 'H0')) +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  geom_vline(xintercept = t, alpha=.7) +
+  labs(fill = 'Test',
+       subtitle = 'Pr(x) < upper critical value')
 
 
+pu <- tibble(mean = diff_m,
+       sd = diff_s) %>%
+  ggplot(aes(
+    xdist = dist_normal(mean, sd),
+    fill = stat(x > t_low)
+  )) +
+  stat_slab() +
+  theme_classic() +
+  scale_fill_manual(values=c('gray80', 'skyblue'),
+                    labels=c('H1', 'H0'))+
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  geom_vline(xintercept = t, alpha=.7) +
+  labs(fill = 'Test',
+       subtitle = 'Pr(x) > lower critical value')
+
+
+
+pe <- tibble(mean = diff_m,
+       sd = diff_s) %>%
+  ggplot(aes(
+    xdist = dist_normal(mean, sd),
+    fill = stat(x > t_low & x < t_high)
+  )) +
+  stat_slab() +
+  theme_classic() +
+  scale_fill_manual(values=c('gray80', 'skyblue'),
+                    labels=c('H1', 'H0')) +
+  theme(axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) +
+  geom_vline(xintercept = t, alpha=.7) +
+  labs(fill = 'Test',
+       subtitle='Equivalence region')
+```
+
+```{r render_plot}
+# define patchwork layout
+layout <- "
+AABB
+AACC
+AADD
+"
+p_dists + pl + pu + pe +
+  plot_layout(design=layout) +
+  plot_annotation(
+       title="Equivalence Tests: Two One-Sample Test (TOST)",
+       subtitle = "Test whether groups differ by less than Cohen's d=0.3",
+       caption = "Graphic: @drkeithyoder | #30DayChartChallenge"
+  )
+
+ggsave('Day10.png', width=6, height=4.5)
 ```
 

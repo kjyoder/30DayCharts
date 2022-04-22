@@ -1,0 +1,15 @@
+---
+title: 'Day 12: The Economist'
+author: "Keith Yoder"
+date: '2022-04-22'
+output:
+  html_document:
+    df_print: paged
+---
+
+## Day 12 of \#30DayChartChallenge
+Theme day: The Economist
+
+```{r setup, message=FALSE, warning=FALSE}
+
+```
