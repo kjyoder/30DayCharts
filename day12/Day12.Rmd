@@ -11,5 +11,51 @@ output:
 Theme day: The Economist
 
 ```{r setup, message=FALSE, warning=FALSE}
-
+require(tidyverse)
+require(ggthemes)
+require(readxl)
 ```
+
+```{r import}
+d <- read_excel('../data/VaxEffect.xlsx')
+d %>% glimpse()
+```
+
+```{r tidy}
+dp <- d %>%
+  mutate(Age = factor(Age, levels=c( '>=80', '70-79','60-69', '20-59')),
+         Dose = factor(Dose, levels=c(1, 2, 3), labels=c('One Dose', 'Two Doses', 'Three Doses')))
+```
+
+
+```{r plot}
+dp %>%
+  ggplot(aes(x=Age, y=Mean, color=Vaccine)) +
+  geom_point(position=position_dodge(width=-.5),
+             size=2) +
+  geom_errorbar(aes(ymin=lower, ymax=upper),
+                position=position_dodge(width=-.5),
+                width=0, size=1.5, alpha=.6) +
+  coord_flip() +
+  facet_wrap(~ Dose, nrow = 3,
+             scales = 'free', strip.position = 'left') +
+  scale_y_continuous(limits=c(0,100), position='right') +
+  theme_economist_white() + 
+  theme(panel.background = element_rect(fill='white'),
+        plot.background = element_rect(fill='white'),
+        panel.grid.major.x = element_line(color='gray80', size=.5),
+        panel.grid.major.y = element_line(color='gray80', size=.5),
+        strip.text.y.left = element_text(angle = 0, vjust = 1),
+        strip.placement = 'outside',
+        axis.line = element_blank(), #line(color='gray80'),
+        axis.ticks.x = element_line(color='gray80'),
+        legend.background = element_rect(fill='white')
+        ) +
+  scale_color_manual(values = c('#1c2b73', '#e3120c')) +
+  labs(x=NULL, y=NULL, color=NULL,
+       title="Vaccine Effectiveness in Hong Kong",
+       subtitle="Each dose reduces severe/fatal disease",
+       caption="Data: McMenamin et al. medAxiv | Graphic: @drkeithyoder | #30DayChartChallenge")
+ggsave('Day12.png', width=6, height=6)
+```
+
